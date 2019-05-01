@@ -1,5 +1,4 @@
 .messages
-  each type in Object.keys(message)
-    ul(class="#{type}")
-      each message in message[type]
-        li= message
+  each type in Object.keys(messages)
+    each message in messages[type]
+      div(class="alert alert-" + type) #{message}
