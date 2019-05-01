@@ -35,34 +35,32 @@ router.get('/:id/edit', function(req, res) {
   });
 });
 
-router.post(
-  '/create', [
-    check('title').isLength({ min: 1 }).withMessage('Title is required'),
-    check('author').isLength({ min: 1 }).withMessage('Author is required'),
-    check('body').isLength({ min: 1 }).withMessage('Body is required')
-  ], function(req, res) {
-    const errors = validationResult(req);
+router.post('/create', [
+  check('title').isLength({ min: 1 }).withMessage('Title is required'),
+  check('author').isLength({ min: 1 }).withMessage('Author is required'),
+  check('body').isLength({ min: 1 }).withMessage('Body is required')
+], function(req, res) {
+  const errors = validationResult(req);
 
-    if(!errors.isEmpty()) {
-      res.render('articles/new', {
-        title: 'Add Article',
-        errors: errors.array()
-      });
-    } else {
-      let article = new Article(req.body);
+  if(!errors.isEmpty()) {
+    res.render('articles/new', {
+      title: 'Add Article',
+      errors: errors.array()
+    });
+  } else {
+    let article = new Article(req.body);
 
-      article.save(function(err) {
-        if(err) {
-          console.log(err);
-          return;
-        } else {
-          req.flash("success", "Article Added");
-          res.redirect('/');
-        }
-      });
-    }
+    article.save(function(err) {
+      if(err) {
+        console.log(err);
+        return;
+      } else {
+        req.flash("success", "Article Added");
+        res.redirect('/');
+      }
+    });
   }
-);
+});
 
 router.post('/update/:id', function(req, res) {
   let query = { _id: req.params.id };

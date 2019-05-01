@@ -3,9 +3,11 @@ const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const passport = require('passport');
+const config = require('./config/database');
 
 
-mongoose.connect("mongodb+srv://abc01:abc01@clustersgp-nsn0q.mongodb.net/nodejs-blog?retryWrites=true", { useNewUrlParser: true });
+mongoose.connect(config.database, { useNewUrlParser: true });
 let db = mongoose.connection;
 
 db.on('open', function() {
@@ -19,7 +21,7 @@ db.on('error', function(err) {
 const app = express();
 
 app.use(session({
-  secret: 'keyboard cat',
+  secret: config.secret,
   resave: false,
   saveUninitialized: true
 }));
@@ -34,12 +36,18 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+require('./config/passport')(passport);
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 let articles = require('./routes/articles');
+let users = require('./routes/users');
 
 app.use('/articles', articles);
+app.use('/users', users);
 
 let Article = require('./models/article');
 app.get('/', function(req, res) {
