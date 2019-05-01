@@ -1,0 +1,5 @@
+.messages
+  each type in Object.keys(message)
+    ul(class="#{type}")
+      each message in message[type]
+        li= message
