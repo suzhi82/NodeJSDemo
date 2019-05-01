@@ -3,6 +3,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const { check, validationResult } = require('express-validator/check');
 
 
 mongoose.connect("mongodb+srv://abc01:abc01@clustersgp-nsn0q.mongodb.net/nodejs-blog?retryWrites=true", { useNewUrlParser: true });
@@ -70,19 +71,34 @@ app.get('/articles/:id/edit', function(req, res) {
   });
 });
 
-app.post('/articles/create', function(req, res) {
-  let article = new Article(req.body);
+app.post(
+  '/articles/create', [
+    check('title').isLength({ min: 1 }).withMessage('Title is required'),
+    check('author').isLength({ min: 1 }).withMessage('Author is required'),
+    check('body').isLength({ min: 1 }).withMessage('Body is required')
+  ], function(req, res) {
+    const errors = validationResult(req);
 
-  article.save(function(err) {
-    if(err) {
-      console.log(err);
-      return;
+    if(!errors.isEmpty()) {
+      res.render('new', {
+        title: 'Add Article',
+        errors: errors.array()
+      });
     } else {
-      req.flash("success", "Article Added");
-      res.redirect('/');
+      let article = new Article(req.body);
+
+      article.save(function(err) {
+        if(err) {
+          console.log(err);
+          return;
+        } else {
+          req.flash("success", "Article Added");
+          res.redirect('/');
+        }
+      });
     }
-  });
-});
+  }
+);
 
 app.post('/articles/update/:id', function(req, res) {
   let query = { _id: req.params.id };
@@ -92,6 +108,7 @@ app.post('/articles/update/:id', function(req, res) {
       console.log(err);
       return;
     } else {
+      req.flash("success", "Article Updated");
       res.redirect('/');
     }
   });
