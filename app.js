@@ -40,6 +40,13 @@ require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.get('*', function(req, res, next) {
+  res.locals.user = req.user || null;
+  next();
+});
+
+let Article = require('./models/article');
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -49,7 +56,6 @@ let users = require('./routes/users');
 app.use('/articles', articles);
 app.use('/users', users);
 
-let Article = require('./models/article');
 app.get('/', function(req, res) {
   Article.find({}, function(err, articles) {
     res.render('articles/index', {
